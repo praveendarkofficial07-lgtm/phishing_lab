@@ -1,0 +1,122 @@
+import csv
+from pathlib import Path
+
+DATA_FILE = Path(__file__).resolve().parent / "phishing_training_data.csv"
+
+SAFE_DATASET = [
+    # Phishing examples (Urgency, Credential Harvesting, Fake Invoices, Account Suspension, Authority, Scams)
+    ("phishing", "URGENT: Your Microsoft 365 password will expire in 2 hours. Click here immediately to keep your current password and avoid losing mailbox access: http://login-microsoft365-verify.com/auth"),
+    ("phishing", "Security Alert: Unauthorized sign-in detected on your corporate account from IP 194.26.29.112 (Moscow, Russia). Verify your identity now or your account will be permanently deactivated within 24 hours."),
+    ("phishing", "Immediate Action Required: Payroll update failed. Your direct deposit information could not be verified. Please click the link to re-enter your banking credentials immediately to avoid payroll delays: http://secure-payroll-portal-update.org/login"),
+    ("phishing", "IT Helpdesk Warning: Critical security patch required for all employees. Download and execute the attached global certificate updater tool or your workstation network connection will be revoked."),
+    ("phishing", "DHL Express: Your delivery package #DHL-981249 is pending customs duty payment of $2.45. If payment is not submitted within 12 hours, package will be returned to sender. Pay here: http://track-dhl-parcel-service.top/pay"),
+    ("phishing", "Bank of America Alert: Unusual debit transaction of $1,420.00 at Apple Store. If this was not you, please log in immediately to cancel this transaction and freeze your card: http://bofa-fraud-prevention-desk.cc/verify"),
+    ("phishing", "DocuSign: Executive Vice President has sent you an urgent contract 'Confidential Merger Agreement.pdf'. Review and sign within 2 hours: http://docusign-secure-document-sign.xyz/view"),
+    ("phishing", "Internal Revenue Service Notice: Tax refund status update. You are eligible for an unclaimed refund of $842.10. Submit your SSN and bank account details here to receive payout: http://irs-gov-tax-refund-claim.biz/submit"),
+    ("phishing", "Netflix Membership On Hold: We could not process your monthly billing payment. Please update your payment card information immediately to continue streaming without interruption: http://netflix-account-update-billing.info/cards"),
+    ("phishing", "Apple Security: Someone attempted to access your iCloud account from an unrecognized device in Beijing. Log in to verify your Apple ID and secure your keychain: http://apple-id-verify-credentials.com/session"),
+    ("phishing", "Google Workspace Administrator: Storage quota exceeded (99.8% full). All incoming emails will be bounced unless you confirm your login and expand quota: http://workspace-google-quota-upgrade.net/auth"),
+    ("phishing", "Amazon Customer Notice: Your order #402-99812-441 for PlayStation 5 ($499.99) has shipped. If you did not place this order, contact our dispute department immediately: http://amazon-order-cancel-center.vip/refund"),
+    ("phishing", "Urgent CEO Request: Are you at your desk right now? I need you to purchase 5 Apple gift cards of $100 each for a client presentation. Reply back with the codes as soon as possible."),
+    ("phishing", "Wells Fargo Warning: Wire transfer in progress. $8,500.00 is being transferred to external account. To stop this transaction, provide your one-time verification passcode now."),
+    ("phishing", "PayPal Security Center: Your account has been limited due to suspicious activity. Submit photo identification and credit card statement to restore access: http://paypal-resolution-center-secure.top/restore"),
+    ("phishing", "FedEx Tracking: We could not deliver your parcel due to missing apartment number. Update delivery address and pay redelivery fee of $1.99: http://fedex-express-delivery-parcel.link/address"),
+    ("phishing", "LinkedIn Notification: You have 3 unread messages from recruiters offering $180,000 remote positions. Log in to claim your job application: http://linkedin-careers-portal-login.online/apply"),
+    ("phishing", "Office365 Migration Notice: Your organization is migrating mail servers tonight. Failure to authenticate your credentials will result in email deletion: http://outlook-exchange-auth-portal.com/login"),
+    ("phishing", "Human Resources: Important changes to corporate 401(k) benefits and healthcare contributions. Please review the attached document and log into the employee portal with your SSO: http://hr-employee-portal-connect.site/sso"),
+    ("phishing", "Zoom Meeting Invite: CEO has scheduled an all-hands emergency meeting regarding layoffs. Click here to join meeting and view the affected roster: http://zoom-conference-join-room.click/meeting"),
+    ("phishing", "ATT Alert: Your cellular service will be suspended due to overdue invoice. Pay total balance immediately: http://att-billing-payment-overdue.com/invoice"),
+    ("phishing", "Cryptocurrency Wallet Notice: Metamask wallet sync required. Failure to reconnect your seed phrase will result in wallet lock: http://metamask-sync-protocol-web3.io/keys"),
+    ("phishing", "USPS Tracking: Delivery attempt failed for package #US940010920. Confirm your contact details and pay redelivery fee here: http://usps-redelivery-postal-service.cc/form"),
+    ("phishing", "Dropbox Shared Folder: CFO shared financial projection 2026.xlsx with you. Sign in with your work email credentials to decrypt file: http://dropbox-secure-cloud-view.vip/access"),
+    ("phishing", "Adobe Creative Cloud: Your subscription expired. Download the renewal certificate patch immediately to prevent software termination: http://adobe-license-renewal-portal.top/download"),
+    ("phishing", "Slack Notification: You were mentioned in an urgent channel by Security Officer. Review flagged message: http://slack-enterprise-connect-login.online/channel"),
+    ("phishing", "Voicemail Notification: You have 1 new pending audio voicemail (0:48s) from internal extension 4012. Listen to audio message: http://voicemail-player-telecom.site/listen"),
+    ("phishing", "SharePoint Document: Shared HR bonus spreadsheet is ready for your review. Confirm your identity to unlock confidential columns: http://sharepoint-office365-document-access.net/view"),
+    ("phishing", "Stripe Notice: Your merchant account has been paused due to suspicious chargebacks. Update your banking routing numbers immediately: http://stripe-merchant-verify-account.info/auth"),
+    ("phishing", "Facebook Security: Your page has violated copyright intellectual property rules and will be deleted within 48 hours. Submit appeal now: http://facebook-meta-appeal-form.biz/case"),
+    ("phishing", "DocuSign Envelope: Final Release of Claims document requires your signature today before 5:00 PM EST. Access envelope: http://docusign-signing-service-auth.com/envelope"),
+    ("phishing", "Chase Online Banking: We detected an unrecognized browser accessing your savings balance. Please verify your security questions and debit PIN: http://chase-bank-account-protection.link/login"),
+    ("phishing", "Workday HR Notification: Annual salary bonus statements have been published. Log in with corporate password to view bonus: http://workday-enterprise-sso-login.top/bonus"),
+    ("phishing", "Cisco Webex Security: Meeting host recorded the audio call. Enter your corporate email password to listen to recording: http://webex-recording-playback-stream.cc/listen"),
+    ("phishing", "WhatsApp Web: Someone registered a new phone with your WhatsApp number. If you did not request this, click here to disconnect immediately: http://whatsapp-web-security-code.online/disconnect"),
+    ("phishing", "GitHub Security Advisory: Critical vulnerability found in your private repository. Run this command or sign in to verify token: http://github-security-alert-review.site/repo"),
+    ("phishing", "Salesforce Notification: Your CRM user session expired. Re-enter your corporate username and password to prevent loss of lead data: http://salesforce-crm-login-session.vip/login"),
+    ("phishing", "Charles Schwab: Wire transfer initiated for $12,000. If unauthorized, verify your account details immediately: http://schwab-fraud-prevention-portal.org/wire"),
+    ("phishing", "Twitter / X Verification: Your blue checkmark badge will be revoked in 24 hours unless you verify ownership: http://x-twitter-verification-badge.cc/verify"),
+    ("phishing", "Instagram Copyright Warning: Your account infringes on registered trademarks. Submit dispute now or account will be permanently banned: http://instagram-copyright-center-appeal.top/appeal"),
+    ("phishing", "Suspicious login attempt blocked: Someone from Nigeria attempted to sign in to your Outlook account. Reset your password immediately: http://outlook-auth-verification-check.com"),
+    ("phishing", "Payment Declined: Your latest invoice for Web Hosting could not be billed. Re-enter credit card information within 24 hours to avoid site shutdown: http://billing-cpanel-update-portal.net"),
+    ("phishing", "Urgent invoice attached: Outstanding balance of $3,840.90 is past due. Failure to remit payment today will trigger collections action. Open invoice: http://finance-invoice-accounting-pay.vip/bill"),
+    ("phishing", "Employee Termination Notice: An employee under your supervision has filed an emergency grievance. Review the confidential complaint document here: http://hr-employee-relations-case.top/file"),
+    ("phishing", "Citibank Security Department: Fraudulent wire instruction submitted. Call our automated verification system or cancel via link: http://citi-fraud-wire-cancellation.link/verify"),
+    ("phishing", "QuickBooks Intuit Alert: Your payroll tax submission encountered an error. Click here to confirm employer tax ID and banking details: http://intuit-quickbooks-payroll-auth.info/login"),
+    ("phishing", "Your computer is infected with 3 viruses! McAfee subscription lapsed. Renew now to eliminate malware threats: http://mcafee-antivirus-renewal-alert.biz/clean"),
+    ("phishing", "Overdue Parking Citation #NYC-88210: Pay ticket within 48 hours to avoid vehicle impoundment and court summons: http://city-parking-citation-payment.cc/pay"),
+    ("phishing", "Emergency Medical Insurance Update: Your coverage is set to expire on the 1st of the month. Confirm beneficiary details immediately: http://health-benefit-verification-claims.site/submit"),
+    ("phishing", "Dropbox: Storage limit reached! Upgrade now for free 50GB by logging into your account: http://dropbox-storage-upgrade-claim.vip/login"),
+
+    # Legitimate examples (Internal memos, dev updates, sprint meetings, shipping notices, HR info, IT bulletins)
+    ("legitimate", "Hi Team, here is the weekly engineering sprint update. We completed the migration of database indexes and scheduled regression testing for Thursday. Please review the PRs in your queue."),
+    ("legitimate", "Reminder: Our bi-weekly team sync is tomorrow at 10:00 AM in Conference Room B and via Google Meet. The agenda includes Q3 milestone reviews and roadmap updates."),
+    ("legitimate", "All Hands Meeting: Please join our monthly company-wide town hall this Friday at 2:00 PM EST. The leadership team will share our annual product strategy and answer questions."),
+    ("legitimate", "GitLab CI Pipeline #48291 for branch feature/auth-middleware succeeded on master. All 148 unit tests and lint checks passed with zero errors."),
+    ("legitimate", "HR Bulletin: Open enrollment for health insurance benefits begins next Monday, October 15. Informational webinars will be hosted on Wednesday at noon. Review plan options in the employee handbook."),
+    ("legitimate", "Lunch & Learn: Tech Talk on Kubernetes service mesh architecture and observability by David on Thursday at 12:30 PM. Catered lunch will be provided in the 4th floor lounge."),
+    ("legitimate", "Code Review Request: Alice requested your review on pull request #342: 'Refactor URL validation utilities and sanitize user inputs'. Please submit comments by end of day tomorrow."),
+    ("legitimate", "Annual Company Holiday Schedule: Please find attached the approved calendar of official corporate office holidays for the upcoming year 2027."),
+    ("legitimate", "Your order #78912 from Office Supplies Depot has shipped via UPS Ground. Tracking number: 1Z9999999999999999. Estimated delivery is Friday afternoon."),
+    ("legitimate", "Monthly Cloud Infrastructure Summary: Production cluster resource consumption remained within budgeted limits (62% CPU, 58% memory). Detailed Grafana dashboard available on our intranet."),
+    ("legitimate", "Security Awareness Reminder: October is Cybersecurity Awareness Month! Remember that our security operations team will never ask for your password via chat or email. Report suspicious emails to security@internal.domain."),
+    ("legitimate", "Facilities Notice: Scheduled building elevator maintenance will occur this Saturday between 8:00 AM and 1:00 PM. Stairwell access will remain open throughout."),
+    ("legitimate", "Welcome to the team! We are thrilled to welcome Sarah Miller as our new Senior Frontend Engineer in the Platform team. Feel free to say hi on Slack."),
+    ("legitimate", "Quarterly Financial Results: The company Q2 financial performance overview has been posted to the investor relations intranet page. Great work everyone on reaching our targets."),
+    ("legitimate", "Software Library Upgrade: We are planning to update our Python dependency versions across all staging services next Tuesday evening during the standard maintenance window."),
+    ("legitimate", "Office Relocation Survey: Please complete our 3-question survey regarding parking preference and desk setup for the new downtown office building."),
+    ("legitimate", "Jira Notification: Issue DEV-1049 'Fix pagination bug on dashboard table' was marked as Resolved and moved to QA testing by John."),
+    ("legitimate", "Design Review: The Figma mockups for the new reporting analytics module are ready for feedback. Please leave comments directly on the wireframes by Wednesday."),
+    ("legitimate", "Coffee Machine Maintenance: The espresso machine in the kitchen breakroom has been repaired and refilled with fresh beans. Enjoy!"),
+    ("legitimate", "Volunteer Day: Join our annual community outreach park clean-up on Saturday morning. T-shirts and snacks will be provided for all participants."),
+    ("legitimate", "Customer Feedback Summary: Customer satisfaction ratings for customer support averaged 4.8/5.0 this month. Kudos to the customer operations team!"),
+    ("legitimate", "Internal Training Session: Docker and containerization best practices workshop will be held on Thursday at 3:00 PM via Zoom for interested junior developers."),
+    ("legitimate", "Team Offsite Planning: We are finalizing the venue for our upcoming team hackathon. Please vote in the team channel for your preferred date."),
+    ("legitimate", "Production Release Notes: Version 2.4.0 is now live in production. Highlights include 30% faster query response times and enhanced export formatting."),
+    ("legitimate", "Library Book Return: A friendly reminder that books borrowed from the company engineering library should be returned within 30 days so teammates can access them."),
+    ("legitimate", "Wellness Week: Free yoga and guided meditation sessions are available every morning at 8:30 AM in the wellness room during this week."),
+    ("legitimate", "IT Equipment Refresh: Employees with laptops older than 3 years are eligible for hardware upgrade. Check your device eligibility in the service catalog."),
+    ("legitimate", "Quarterly OKR Review: Managers are requested to finalize key results for their teams before the end of the sprint cycle."),
+    ("legitimate", "Server Backup Verification: Automated database snapshot backups completed successfully at 03:00 UTC. Integrity checks passed with zero checksum anomalies."),
+    ("legitimate", "Conference Sponsorship: Our proposal to sponsor the local PyData conference was approved. If you are interested in speaking or attending, please notify engineering management."),
+    ("legitimate", "Project Retro Notes: Thank you everyone for participating in yesterday retrospective. Action items have been logged in Confluence under Platform Operations."),
+    ("legitimate", "New Knowledge Base Article: Check out our newly published guide on writing efficient PostgreSQL queries and optimizing join conditions on large tables."),
+    ("legitimate", "Reminder: Friday Donut Morning! The product team is hosting breakfast donuts at 9:30 AM in the central kitchen. All are welcome."),
+    ("legitimate", "Quarterly Compliance Training: Please complete your annual data privacy modules in the training LMS by the end of this month. It takes roughly 25 minutes."),
+    ("legitimate", "On-Call Schedule Handover: The primary on-call rotation for the core API services will transfer from Michael to Lisa starting Monday at 09:00 UTC."),
+    ("legitimate", "API Documentation Updated: The OpenAPI specification for our v3 endpoints has been published to SwaggerHub with updated request schemas and code samples."),
+    ("legitimate", "Blood Drive Announcement: The local Red Cross will host an on-site blood donation van in the company parking lot next Wednesday from 10 AM to 3 PM."),
+    ("legitimate", "Performance Review Cycle: Mid-year self-assessments are now open in CultureAmp. Please complete your reviews by Friday, July 14."),
+    ("legitimate", "Internal Hackathon Kickoff: Registration for our 48-hour internal AI hackathon is now open. Form teams of 2 to 4 engineers and sign up on the portal."),
+    ("legitimate", "Git Branch Cleanup: Please review and delete stale local and remote Git branches that have already been merged into main."),
+    ("legitimate", "Weekly Bug Triage: Join the QA team today at 4:00 PM for bug scrub and priority alignment before next week sprint planning."),
+    ("legitimate", "Data Warehouse Schema Migration: New columns added to the events_dim table in BigQuery. Documentation is available in our data catalog."),
+    ("legitimate", "New Slack Channel Created: We created #ai-research for discussing recent papers and open source LLM tooling. Feel free to join."),
+    ("legitimate", "IT Maintenance Window: Scheduled network switch firmware upgrades will be performed this Sunday between 02:00 and 04:00 UTC."),
+    ("legitimate", "Department Budget Planning: Department heads please review draft budget allocations for Q4 and send feedback before Wednesday."),
+    ("legitimate", "Employee Referral Bonus: We have open positions for Senior Backend Engineer and Product Designer. Refer candidates through our recruiting portal."),
+    ("legitimate", "Clean Desk Policy: Reminder to lock workstations when stepping away and secure physical access badges at all times."),
+    ("legitimate", "Customer Success Story: Case study featuring our client Acme Corp has been published to our corporate blog and LinkedIn page."),
+    ("legitimate", "Annual Company Picnic: Save the date for Saturday August 12! Games, barbecue, and activities planned for employees and families."),
+    ("legitimate", "Microservices Architecture RFC: Request for Comments #18 has been posted for the payment service decomposition. Feedback welcome until Friday.")
+]
+
+def generate_dataset():
+    DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(DATA_FILE, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["label", "text"])
+        for label, text in SAFE_DATASET:
+            writer.writerow([label, text])
+    print(f"Generated {len(SAFE_DATASET)} safe academic training samples (50 phishing, 50 legitimate) in {DATA_FILE}")
+
+if __name__ == "__main__":
+    generate_dataset()
